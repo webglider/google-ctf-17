@@ -38,3 +38,5 @@ Was:
     0
 ```
 A quick google search for `crc_82_darc` tells us that it's a function from the `pwnlib` python library. It's a variant of the **CRC checksum** which is commonly used for error detection. (Think MD5 but much much much much simpler). The function takes a string and outputs a number (82 bit in this case). According to the hints we need to find a string of '0's and '1's of length 82 whose CRC checksum when represented in binary is the string itself. This challenge was inspired from a "self hashing" [GIF image](https://shells.aachen.ccc.de/~spq/md5.gif) which was popular on twitter, reddit and hacker news a few months ago. The MD5 hash of the image file is the same as the text displayed on the image. Analogously, here we need to find a string (as opposed to image) which hashes to itself (CRC as opposed to MD5).
+
+Bruteforcing over all possible strings is clearly infeasible (there are 2^82 possibilities). Trivial strings like all '0's, all '1's, all '0's except one '1' etc... dont work either. Hence, I decided to take a more principled approach and mathematically formulate the problem. It turns out that doing so requires a fair amount of algebra. 
