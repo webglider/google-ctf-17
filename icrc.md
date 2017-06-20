@@ -4,4 +4,4 @@ This is a write-up of my solution to an interesting crypto challenge that appear
 ```
 $ nc selfhash.ctfcompetition.com 1337
 Give me some data:   
-`
+```
