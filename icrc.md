@@ -70,7 +70,7 @@ Here I've defined a symbol `x` using the SymPy function `symbols()`. Then I crea
 >>> Poly(p, x).coeffs()
 [2, 1, 1]
 ```
-In the above example, I've defined two polynomial expressions `p` and `g`. Then I used the `div` function to perform [poylnomial divison](https://en.wikipedia.org/wiki/Polynomial_long_division). The result is a tuple of (quotient, remainder).
+In the above example, I've defined two polynomial expressions `p` and `g`. Then I used the `div` function to perform [polynomial divison](https://en.wikipedia.org/wiki/Polynomial_long_division). The result is a tuple of (quotient, remainder).
 The last statement extracts the coefficients of polynomial `p` and returns them as a list.
 
 ## Background
@@ -102,11 +102,11 @@ b + 1
 ### CRC
 [Cyclic Redundancy Check (CRC)](https://en.wikipedia.org/wiki/Cyclic_redundancy_check) is a [checksum](https://en.wikipedia.org/wiki/Checksum) that is commonly used for error detection and correction in numerous applications. The input is a binary message of arbitrary size and the output is a fixed size checksum.
 
-Consider a polynomial with coefficients in GF(2) (I'm going to call such a polynomial as *GF(2) Polynomial*). Since each of the terms' coefficients is either 0/1, we can represent it as a bit string of length degree + 1. For example the polynomial `x**3 + x + 1` would be represented as `1011`. Similarly every bit string can be represented as a polynomial (with coefficients in GF(2)) of degree length - 1. Hence, there is a bijective mapping between bit strings and GF(2) polynomials.
+Consider a polynomial with coefficients in GF(2) (I'm going to call such a polynomial a *GF(2) Polynomial*). Since each of the terms' coefficients is either 0/1, we can represent it as a bit string of length *degree + 1*. For example the polynomial `x**3 + x + 1` would be represented as `1011`. Similarly every bit string can be represented as a GF(2) polynomial of degree *length - 1*. Hence, there is a bijective mapping between bit strings and GF(2) polynomials.
 
-To compute the CRC checksum of a bit string it is converted to it's corresponding GF(2) polynomial which is then divided by a fixed *generator polynomial*. The remainder polynomial obtained after division is converted back to a bit string which is the checksum. Different variants of CRC may use different generator polynomials. Also, before division the input bitstring is left shifted by an amount equal to the degree of the generator polynomial. Since the coefficients are in GF(2), while performing the polynomial division, all arithmetic on the coefficients must be done modulo 2 (which is equivalent to doing it normally and taking all the coefficients modulo 2 and the end).
+To compute the CRC checksum of a bit string it is converted to it's corresponding GF(2) polynomial which is then divided by a fixed *generator polynomial*. The remainder polynomial obtained after division is converted back to a bit string which is the checksum. Different variants of CRC may use different generator polynomials. Also, before division the input bitstring is left shifted by an amount equal to the degree of the generator polynomial. Since the coefficients are in GF(2), while performing the polynomial division, all arithmetic on the coefficients must be done modulo 2 (which is equivalent to doing it normally and taking all the coefficients modulo 2 at the end).
 
-For example, assume the generator polynomial is `G(x) = x**3 + x + 1`. Then to compute the CRC checksum of bitsring `11010011101` (polynomial form: `x**10 + x**9 + x**7 + x**4 + x**3 + x**2 + 1`):
+For example, assume the generator polynomial is `G(x) = x**3 + x + 1`. Then to compute the CRC checksum of the bitsring `11010011101` (polynomial form: `x**10 + x**9 + x**7 + x**4 + x**3 + x**2 + 1`):
 ```python
 >>> g = x**3 + x + 1 # Generator polynomial 
 >>> p = x**10 + x**9 + x**7 + x**4 + x**3 + x**2 + 1 # Input polynomial
@@ -119,12 +119,12 @@ For example, assume the generator polynomial is `G(x) = x**3 + x + 1`. Then to c
 Hence the CRC checksum is `001`. Note that the number of bits of the checksum will always be equal to the degree of the generator polynomial.
 
 ## Formulating the problem
-Recap of the problem: Find a string of '0's and '1's of length 82 whose CRC checksum when represented in binary is the string itself. The CRC variant we need to deal with is the `crc_82_darc` function from the pwnlib library. It is easy to find the details of this function looking at the [docs]() and [source]() of pwnlib:
+Recap of the problem: Find a string of '0's and '1's of length 82 whose CRC checksum when represented in binary is the string itself. The CRC variant we need to deal with is the `crc_82_darc` function from the pwnlib library. It is easy to find the details of this function looking at the [docs](http://docs.pwntools.com/en/stable/util/crc.html#pwnlib.util.crc.crc_82_darc) and [source](https://github.com/Gallopsled/pwntools/blob/dev/pwnlib/util/crc/__init__.py#L255) of pwnlib:
 * The generator polynomial (in bitstring form) is `0x308c0111011401440411 | (1<<82)` (degree 82)
 * Before division, the *bits of every byte* in the input string are reversed
 * The bits of the resulting checksum are reversed before it is returned
 
-Let the string we are looking for be *b<sub>1</sub>b<sub>2</sub>b<sub>3</sub>..b<sub>82</sub>* where each of the *b<sub>i</sub>*s is a boolean variable representing whether the i<sup>th</sup> character in the string is a '0' or '1'. Since the string has 82 characters the number of bits is 8x82. The binary representation of '0' is `00110000` and '1' is `00110001`. Since `crc_82_darc` first reverses the bits in every byte, their representations effectively becomes `00001100` & `10001100` respectively. Hence in general the i<sup>th</sup> byte of the input bitstring is *b<sub>i</sub>0001100*. Lets construct the polynomial corresponding to the input bitstring *m(x)*:
+Let the string we are looking for be *b<sub>1</sub>b<sub>2</sub>b<sub>3</sub>..b<sub>82</sub>* where each of the *b<sub>i</sub>* s is a boolean variable representing whether the i<sup>th</sup> character in the string is a '0' or '1'. Since the string has 82 characters the number of bits is 8x82. The binary representation of '0' is `00110000` and '1' is `00110001`. Since `crc_82_darc` first reverses the bits in every byte, their representations effectively becomes `00001100` & `10001100` respectively. Hence in general the i<sup>th</sup> byte of the input bitstring is *b<sub>i</sub>0001100*. Lets construct the polynomial corresponding to the input bitstring *m(x)*:
 ```python
 x = symbols('x')
 b = ['']
@@ -161,7 +161,7 @@ for i in xrange(82):
     r += b[i+1]*(x**i)
 ```
 
-Now that all the required polynomials (*m(x)*, *g(x)*, *r(x)*) have been defined, all we have to do is find *b<sub>i</sub>*s such that `m(x)*x**82 = q(x)*g(x) + r(x)` for some polynomial q(x). 
+Now that all the required polynomials (*m(x)*, *g(x)*, *r(x)*) have been defined, all we have to do is find *b<sub>i</sub>* s such that `m(x)*x**82 = q(x)*g(x) + r(x)` for some polynomial q(x). 
 
 ## Doing the Algebra
 The above equation can be re-written as `m(x)*x**82 - r(x) = q(x)*g(x)`: The remainder when `m(x)*x**82 - r(x)` is divided by `g(x)` is `0`. We can now let SymPy do the tedious polynomial division for us:
@@ -169,7 +169,7 @@ The above equation can be re-written as `m(x)*x**82 - r(x) = q(x)*g(x)`: The rem
 m *= x**82
 remainder = div(m - r, g, x)[1]
 ```
-This may take 1-2 minutes to execute, because the coefficients of the *b<sub>i</sub>*s end up becoming large. (Again this is not an efficient way of doing polynomial division in GF(2), but we don't need to worry about that here since it's a one time computation). Now we extract the coefficients of the `x` terms in the polynomial and apply `modtwo` on them to get the actual coefficient expressions:
+This may take 1-2 minutes to execute, because the coefficients of the *b<sub>i</sub>* s end up becoming large. (Again this is not an efficient way of doing polynomial division in GF(2), but we don't need to worry about that here since it's a one time computation). Now we extract the coefficients of the `x**i` terms in the polynomial and apply `modtwo` on them to get the actual coefficient expressions:
 ```python
 remp = Poly(remainder, x)
 c = remp.coeffs()
@@ -181,9 +181,9 @@ for coeff in c:
 `final` now contains a list of 82 expressions for each of the coefficients of the remainder polynomial. The coefficients of each *b<sub>i</sub>* in the expressions are either 0/1. Since we want the remainder to be `0`, each of these expressions must equal `0`. Hence, we have *82* equations in *82* boolean variables. Solving these will lead us to our answer. 
 
 ## Solving the constraints
-The left hand side of each equation is a sum of a set of boolean variables and the right hand side is either 0/1. Since, addition in GF(2) is nothing but the boolean XOR operator, these are essentially *XOR constraints*. A cyrpto-optimized SAT solver should easily be able to solve for these constraints. Since GF(2) is a field, solver's don't need to brute-force over all possible variable assignments. Instead they can use [Gaussian Elimination](https://en.wikipedia.org/wiki/Gaussian_elimination) to solve the system of linear equations in GF(2).
+The left hand side of each equation is a sum of a set of boolean variables and the right hand side is either 0/1. Since, addition in GF(2) is nothing but the boolean XOR operator, these are essentially *XOR constraints*. A crypto-optimized SAT solver should easily be able to solve for these constraints. Since GF(2) is a field, solver's don't need to brute-force over all possible variable assignments. Instead they can use [Gaussian Elimination](https://en.wikipedia.org/wiki/Gaussian_elimination) to solve the system of linear equations in GF(2).
 
-I used [CryptoMiniSAT](https://github.com/msoos/cryptominisat) for this purpose because is support gaussian elimination while dealing with XOR constraints and has a very simple python interface. (It needs to be compiled with the right flags to enable gaussian elimination). Using the interface we can easily construct XOR constraints from the previously obtained expressions:
+I used [CryptoMiniSAT](https://github.com/msoos/cryptominisat) for this purpose because it supports gaussian elimination while dealing with XOR constraints and has a very simple python interface. (It needs to be compiled with the right flags to enable gaussian elimination). Using the interface we can easily construct XOR constraints from the previously obtained expressions:
 ```python
 from pycryptosat import Solver
 s = Solver(verbose = 1)
@@ -206,10 +206,10 @@ print ''.join([str(int(x)) for x in sol[1:]])
 The solution is:
 `1010010010111000110111101011101001101011011000010000100001011100101001001100000000`
 Submitting it to the prompt we get our flag: `CTF{i-hope-you-like-linear-algebra}`
-Absolutely not! The authors are probably refering to the gaussian elimination which the SAT solver was using under the hood. Luckily for me SymPy & CryptoMiniSAT did all the heavy lifting, and I didn't have to explicitly do any linear algebra :) 
+Absolutely not! By linear algebra, the authors are probably refering to the gaussian elimination which the SAT solver was doing under the hood. Luckily for me SymPy & CryptoMiniSAT did all the heavy lifting, and I didn't have to explicitly do any linear algebra :) 
 
 ## Summary
-In summary solving this challenge required finding a "self-hashing" string under the `crc_82_darc` function. First, I mathematically formulated the problem using expressions with boolean varibles in SymPy. After performing the necessary algbraic manipulations, I obtained a set of boolean XOR constraints which I fed to an off-the-shelf crypto-optimized SAT solver (CryptoMiniSAT, which uses gaussian elimination to solve XOR constraints). Using these powerful tools, I was able to work at a high level of abstraction and didn't have to explicitly do any algebra / linear algebra and use pen/paper while solving this challenge.
+In summary solving this challenge required finding a "self-hashing" string under the `crc_82_darc` function. First, I mathematically formulated the problem using expressions with boolean variables in SymPy. After performing the necessary algebraic manipulations, I obtained a set of boolean XOR constraints which I fed to an off-the-shelf crypto-optimized SAT solver (CryptoMiniSAT, which uses gaussian elimination to solve XOR constraints). Using these powerful tools, I was able to work at a high level of abstraction and didn't have to explicitly do any algebra / linear algebra or use pen / paper while solving this challenge.
 
 Here is all the code I used for solving this challenge, compiled into a single script:
 ```python
@@ -275,3 +275,5 @@ for eqn in final:
 sat, sol = s.solve()
 print ''.join([str(int(x)) for x in sol[1:]])
 ```
+
+**CTF{i-hope-you-like-this-write-up}**
