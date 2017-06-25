@@ -44,7 +44,34 @@ Bruteforcing over all possible strings is clearly infeasible (there are 2^82 pos
 ## SymPy
 [SymPy](http://www.sympy.org/en/index.html) is python library for symbolic computation. It basically lets you do algebra at a higher level of abstraction. You can define symbols and construct expressions using them. To perform operations on expressions, you just have to tell SymPy what operation you want to do and it does all the heavy-lifting of actually performing the algebra, returning only the final expression to you. While working with large expressions doing the algebra on paper can become tedious and SymPy can really help in such situations.
 
-[TODO: Examples of SymPy usage]
+Example usage of SymPy:
+```python
+>>> from sympy import *
+>>> x = symbols('x')
+>>> e = x + 1
+>>> e
+x + 1
+>>> e += x
+>>> e *= x
+>>> e
+x*(2*x + 1)
+>>> a = symbols('a')
+>>> e += a*x
+>>> e.subs({x: 2})
+2*a + 10
+```
+
+Here I've defined a symbol `x` using the SymPy function `symbols()`. Then I created a expression `e` by adding `1` to `x`. Note that this doesn't trigger an actual addition, as `x` is a symbol with no specific value. Calling `e` simply prints the underlying expression. Expressions can be manipulated using standard arithmetic operators like `+`, `*` etc. To substitute a value for a symbol in an expression, the `subs` method can be used. The library also contains functions to manipulate polynomials. (polynomial division, extracting coefficients etc..)
+```python
+>>> p = 2*x**2 + x + 1
+>>> g = x + 1
+>>> div(p, g, x)
+(2*x - 1, 2)
+>>> Poly(p, x).coeffs()
+[2, 1, 1]
+```
+In the above example, I've defined two polynomial expressions `p` and `g`. Then I used the `div` function to perform [poylnomial divison](https://en.wikipedia.org/wiki/Polynomial_long_division). The result is a tuple of (quotient, remainder).
+The last statement extracts the coefficients of polynomial `p` and returns them as a list.
 
 ## Background
 
