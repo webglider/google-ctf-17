@@ -75,10 +75,10 @@ The last statement extracts the coefficients of polynomial `p` and returns them 
 
 ## Background
 
- Before describing my solution, I'll give a little bit of background about CRC codes for those who don't know / don't remember. CRC codes are based on division of polynomials which coefficients in the finite field GF(2).
+ Before describing my solution, I'll give a little bit of background about CRC codes for those who don't know / don't remember. CRC codes are based on division of polynomials with coefficients in the finite field GF(2).
 
 ### GF(2)
-[GF(2)](https://en.wikipedia.org/wiki/GF(2)) is a [field](https://en.wikipedia.org/wiki/Field_(mathematics)) which contains only two elements, 0 and 1. Addition and multiplication are done *modulo 2*. For example, `0+1 = 1`, `1+1 = 0`, `0*1 = 0`, `1*1 = 1`. Addition is nothing but the [Boolean XOR](https://en.wikipedia.org/wiki/XOR_gate) operator.   
+[GF(2)](https://en.wikipedia.org/wiki/GF(2)) is a [field](https://en.wikipedia.org/wiki/Field_(mathematics)) which contains only two elements, 0 and 1. Addition and multiplication are done *modulo 2*. For example, `0+1 = (0+1) mod 2 = 1`, `1+1 = 0`, `0*1 = (0*1) mod 2 = 0`, `1*1 = 1`. Addition is nothing but the [Boolean XOR](https://en.wikipedia.org/wiki/XOR_gate) operator.   
 
 ### Algebra in GF(2)
 Since GF(2) is a field, we can do algebra in the same way as we do for rational and real numbers, except everything has to be done *modulo 2*. "Variables" in GF(2) are just Boolean variables (taking values of only 0/1). Let `a` & `b` be two variables in GF(2). If `e = a + b` & `f = a + 1`, then `e + f = b + 1`. Unfortunately, I could not find a built-in mechanism to do algebra in GF(2) using SymPy, so I implemented the following simple function:
@@ -92,7 +92,7 @@ def modtwo(e, syms):
     return res
 ```
 It takes an expression and a list of symbols as input and returns a new expression with all the coefficients of the symbols in the input expression taken modulo 2. Hence, we can do all the algebra we need normally using SymPy and finally apply the `modtwo` fuction on the result to get the result we would have gotten if we had done the algebra in GF(2). (This is inefficient but in this situation we don't really have to care). For example to add the expressions `e` and `f` in the previous paragraph we can simply do:
-```
+```python
 >>> e = a + b
 >>> f = a + 1
 >>> modtwo(e+f, [a,b])
