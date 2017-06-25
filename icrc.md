@@ -42,7 +42,9 @@ A quick google search for `crc_82_darc` tells us that it's a function from the `
 Bruteforcing over all possible strings is clearly infeasible (there are 2^82 possibilities). Trivial strings like all '0's, all '1's, all '0's except one '1' etc... dont work either. Hence, I decided to take a more principled approach and mathematically formulate the problem. It turns out that doing so requires a fair amount of algebra. To deal with this I made use of SymPy, a really cool python library that let's you programmatically do all the algebra you need without the need of pen and paper.
 
 ## SymPy
-[TODO: Describe sympy]
+[SymPy](http://www.sympy.org/en/index.html) is python library for symbolic computation. It basically lets you do algebra at a higher level of abstraction. You can define symbols and construct expressions using them. To perform operations on expressions, you just have to tell SymPy what operation you want to do and it does all the heavy-lifting of actually performing the algebra, returning only the final expression to you. While working with large expressions doing the algebra on paper can become tedious and SymPy can really help in such situations.
+
+[TODO: Examples of SymPy usage]
 
 ## Background
 
