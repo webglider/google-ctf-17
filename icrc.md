@@ -104,7 +104,18 @@ b + 1
 
 Consider a polynomial with coefficients in GF(2) (I'm going to call such a polynomial as *GF(2) Polynomial*). Since each of the terms' coefficients is either 0/1, we can represent it as a bit string of length degree + 1. For example the polynomial `x**3 + x + 1` would be represented as `1011`. Similarly every bit string can be represented as a polynomial (with coefficients in GF(2)) of degree length - 1. Hence, there is a bijective mapping between bit strings and GF(2) polynomials.
 
-To compute the CRC checksum of a bit string it is converted to it's corresponding GF(2) polynomial which is then divided by a fixed *generator polynomial*. The remainder polynomial obtained after division is converted back to a bit string which is the checksum. Different variants of CRC may use different generator polynomials. Also, before division the input bitstring is left shifted by an amount equal to the degree of the generator polynomial. Since the coefficients are in GF(2), while performing the polynomial division, all arithmetic on the coefficients must be done modulo 2 (which is equivalent to doing it normally and taking all the coefficients modulo 2 and the end). 
+To compute the CRC checksum of a bit string it is converted to it's corresponding GF(2) polynomial which is then divided by a fixed *generator polynomial*. The remainder polynomial obtained after division is converted back to a bit string which is the checksum. Different variants of CRC may use different generator polynomials. Also, before division the input bitstring is left shifted by an amount equal to the degree of the generator polynomial. Since the coefficients are in GF(2), while performing the polynomial division, all arithmetic on the coefficients must be done modulo 2 (which is equivalent to doing it normally and taking all the coefficients modulo 2 and the end).
+
+For example, assume the generator polynomial is `G(x) = x**3 + x + 1`. Then to compute the CRC checksum of bitsring `11010011101100` (polynomial form: `x**13 + x**12 + x**10 + x**7 + x**6 + x**5 + x**3 + x**2`):
+```python
+>>> g = x**3 + x + 1 # Generator polynomial 
+>>> p = x**10 + x**9 + x**7 + x**4 + x**3 + x**2 + 1 # Input polynomial
+>>> p *= x**3 # Left shift
+>>> remainder = div(p, g, x)[1] # Remainder after division
+>>> coeffs = Poly(remainder, x).all_coeffs()
+>>> [c % 2 for c in coeffs] # Coefficients of remainder modulo 2
+[0 0 1]
+```
 
 ## Formulating the problem
 
