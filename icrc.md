@@ -83,8 +83,10 @@ The last statement extracts the coefficients of polynomial `p` and returns them 
 
 ## Formulating the problem
 
-## Algebra
+## Doing the Algebra
 
-## SAT Solving
+## Solving the constraints
+
+## Summary
 
 ## References
