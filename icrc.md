@@ -209,3 +209,69 @@ Submitting it to the prompt we get our flag: `CTF{i-hope-you-like-linear-algebra
 Absolutely not! The authors are probably refering to the gaussian elimination which the SAT solver was using under the hood. Luckily for me SymPy & CryptoMiniSAT did all the heavy lifting, and I didn't have to explicitly do any linear algebra :) 
 
 ## Summary
+In summary solving this challenge required finding a "self-hashing" string under the `crc_82_darc` function. First, I mathematically formulated the problem using expressions with boolean varibles in SymPy. After performing the necessary algbraic manipulations, I obtained a set of boolean XOR constraints which I fed to an off-the-shelf crypto-optimized SAT solver (CryptoMiniSAT, which uses gaussian elimination to solve XOR constraints). Using these powerful tools, I was able to work at a high level of abstraction and didn't have to explicitly do any algebra / linear algebra and use pen/paper while solving this challenge.
+
+Here is all the code I used for solving this challenge, compiled into a single script:
+```python
+from sympy import *
+from pycryptosat import Solver
+
+def modtwo(e, syms):
+    coeffs = e.as_coefficients_dict()
+    res = 0
+    for sym in syms:
+        res += (coeffs[sym]%2)*sym
+    res += coeffs[Integer(1)]%2
+    return res
+
+x = symbols('x')
+b = ['']
+for i in xrange(1, 83):
+    b.append(symbols('b' + str(i)))
+
+m = 0 # Input polynomial
+zero = [0,0,0,1,1,0,0]
+k = 0
+for i in xrange(82, 0, -1):
+    for c in zero[::-1]:
+        m += c*(x**k)
+        k += 1
+    m += b[i]*(x**k)
+    k += 1
+
+polynom = 0x308c0111011401440411 | (1<<82)
+polynom = bin(polynom)[2:]
+polynom = [int(bit) for bit in polynom]
+g = 0 # Generator polynomial
+k = 0
+for bit in polynom[::-1]:
+    g += bit*(x**k)
+    k += 1
+
+r = 0 # Remainder polynomial
+for i in xrange(82):
+    r += b[i+1]*(x**i)
+
+m *= x**82
+remainder = div(m - r, g, x)[1]
+
+remp = Poly(remainder, x)
+c = remp.coeffs()
+
+final = []
+for coeff in c:
+    final.append(modtwo(coeff, b[1:]))
+
+s = Solver(verbose = 1)
+for eqn in final:
+    lhs = []
+    for i in xrange(1, 83):
+        if eqn.coeff('b' + str(i)) == 1:
+            lhs.append(i)
+
+    rhs = (eqn.as_coefficients_dict()[Integer(1)] == 1)
+    s.add_xor_clause(lhs, rhs)
+
+sat, sol = s.solve()
+print ''.join([str(int(x)) for x in sol[1:]])
+```
